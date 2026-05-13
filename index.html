@@ -3,27 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UTIC HHT - Configuration Dynamique</title>
+    <title>UTIC HHT - Système Expert</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
-        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .card { background: white; border-radius: 1.25rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
         .nav-active { color: #1e40af; border-bottom: 3px solid #1e40af; font-weight: 800; }
-        input, textarea { border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.75rem; outline: none; transition: all 0.2s; }
-        input:focus { border-color: #3b82f6; ring: 2px solid #dbeafe; }
     </style>
 </head>
 <body>
     <div id="app">
         <!-- LOGIN -->
         <div v-if="!user" class="flex items-center justify-center min-h-screen p-6">
-            <div class="card w-full max-w-sm p-8 border-t-8 border-blue-900">
-                <h1 class="text-3xl font-black text-blue-900 text-center mb-8">UTIC HHT</h1>
+            <div class="card w-full max-w-sm p-8 border-t-8 border-blue-900 shadow-2xl">
+                <h1 class="text-2xl font-black text-blue-900 text-center mb-6">UTIC HHT</h1>
                 <div class="space-y-4">
-                    <input v-model="auth.id" type="text" placeholder="Identifiant" class="w-full">
-                    <input v-model="auth.pass" type="password" placeholder="Mot de passe" class="w-full">
-                    <button @click="login" class="w-full bg-blue-800 text-white font-black py-4 rounded-xl shadow-lg hover:bg-blue-700 transition">CONNEXION</button>
+                    <input v-model="auth.id" type="text" placeholder="Identifiant" class="w-full p-4 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                    <input v-model="auth.pass" type="password" placeholder="Mot de passe" class="w-full p-4 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                    <button @click="login" class="w-full bg-blue-800 text-white font-bold py-4 rounded-xl shadow-lg uppercase">Connexion</button>
                 </div>
             </div>
         </div>
@@ -33,130 +31,141 @@
             <nav class="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-50">
                 <h2 class="font-bold text-blue-900 uppercase italic">UTIC HHT</h2>
                 <div class="flex gap-4 items-center">
-                    <button @click="view = 'Profil'" class="text-[10px] font-bold text-slate-400 uppercase">Mon Profil</button>
-                    <button @click="logout" class="text-red-500 font-bold text-[10px] uppercase border border-red-100 px-3 py-1 rounded-lg">Quitter</button>
+                    <button @click="view = 'Profil'" class="text-[10px] font-bold text-slate-400 uppercase underline">Mon Profil</button>
+                    <button @click="logout" class="text-red-500 font-bold text-sm uppercase">Quitter</button>
                 </div>
             </nav>
 
-            <!-- NAVIGATION ADMIN -->
+            <!-- NAVIGATION STAFF -->
             <div v-if="user.role !== 'patient'" class="flex bg-white shadow-sm sticky top-[57px] z-40 text-[10px] overflow-x-auto">
-                <button v-for="tab in ['Alertes', 'RDV', 'Patients', 'Stats', 'Paramètres']" 
-                        @click="view = tab" 
-                        :class="view === tab ? 'nav-active' : 'text-slate-500'" 
-                        class="flex-1 py-4 uppercase font-bold whitespace-nowrap px-4">
+                <button v-for="tab in (user.role === 'admin' ? ['Alertes', 'RDV', 'Patients', 'Stats', 'Paramètres'] : ['Alertes', 'RDV', 'Patients'])" 
+                        @click="view = tab" :class="view === tab ? 'nav-active' : ''" class="flex-1 py-4 uppercase min-w-[80px]">
                     {{ tab }}
                 </button>
             </div>
 
-            <main class="p-4 max-w-4xl mx-auto space-y-6 pb-24">
-
-                <!-- VUE PATIENT (DYNAMIQUE) -->
+            <main class="p-4 max-w-4xl mx-auto space-y-6 pb-20">
+                
+                <!-- VUE PATIENT -->
                 <div v-if="user.role === 'patient'" class="space-y-6">
-                    <!-- Message Directeur -->
-                    <div v-if="patientMessages[user.id]" class="card p-4 bg-blue-600 text-white">
-                        <p class="text-[10px] font-black uppercase opacity-80">Message de l'Unité</p>
+                    <!-- Message du Directeur -->
+                    <div v-if="patientMessages[user.id]" class="card p-4 bg-blue-600 text-white shadow-lg animate-pulse">
+                        <p class="text-[10px] font-black uppercase opacity-80 mb-1">Message Urgent :</p>
                         <p class="font-bold">"{{ patientMessages[user.id] }}"</p>
-                        <button @click="patientMessages[user.id] = null" class="mt-2 text-[9px] underline">Fermer</button>
+                        <button @click="patientMessages[user.id] = null" class="mt-2 text-[9px] underline uppercase">Marquer comme lu</button>
                     </div>
 
-                    <!-- Formulaire Dynamique -->
-                    <div class="card p-6 border-2 border-red-500">
-                        <h3 class="font-black text-red-600 text-xs uppercase mb-6 text-center">Rapport Médical de Crise</h3>
+                    <div class="card p-6 border-2 border-red-500 shadow-xl">
+                        <h3 class="font-black text-red-600 text-xs uppercase mb-6 text-center">Formulaire Médical de Crise</h3>
                         
                         <!-- Constantes Dynamiques -->
                         <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div v-for="c in config.constantes" :key="c.id" class="flex flex-col">
-                                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">
-                                    {{ c.icon }} {{ c.label }}
-                                </label>
-                                <input v-model="form.vitals[c.id]" :placeholder="c.unit" class="bg-slate-50 text-sm">
+                            <div v-for="c in config.constantes" :key="c.id">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">{{ c.icon }} {{ c.label }}</label>
+                                <input v-model="form.vitals[c.id]" :placeholder="c.unit" class="w-full p-2 bg-slate-50 border rounded-lg text-sm">
                             </div>
                         </div>
 
                         <!-- Symptômes Dynamiques -->
                         <div class="grid gap-2 mb-6">
-                            <div v-for="s in config.symptomes" :key="s.id" 
-                                 @click="toggleSymptom(s.id)"
-                                 :class="form.selectedSigns.includes(s.id) ? 'bg-red-50 border-red-600' : 'border-slate-100 bg-white'"
-                                 class="flex items-center p-4 border-2 rounded-2xl cursor-pointer transition-all">
+                            <div v-for="s in config.symptomes" :key="s.id" @click="toggleSymptom(s.id)"
+                                 :class="form.selectedSigns.includes(s.id) ? 'bg-red-50 border-red-600 shadow-inner' : 'border-slate-100'"
+                                 class="flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all">
                                 <span class="text-xl mr-3">{{ s.icon }}</span>
-                                <span class="font-bold text-sm flex-1">{{ s.label }}</span>
+                                <span class="font-bold text-xs flex-1">{{ s.label }}</span>
                                 <span v-if="form.selectedSigns.includes(s.id)">✅</span>
                             </div>
                         </div>
 
                         <div class="mb-6">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Photo / Document</label>
-                            <input type="file" @change="e => form.file = e.target.files[0].name" class="text-xs w-full">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Joindre photo/document</label>
+                            <input type="file" @change="e => form.file = e.target.files[0].name" class="text-[10px]">
                         </div>
 
-                        <button @click="submitData" class="w-full bg-red-600 text-white font-black py-5 rounded-2xl shadow-xl uppercase">Envoyer l'alerte</button>
+                        <button @click="submitData" class="w-full bg-red-600 text-white font-black py-4 rounded-xl uppercase shadow-lg active:scale-95 transition-all">Envoyer l'alerte</button>
                     </div>
                 </div>
 
-                <!-- PARAMÈTRES (CONFIGURATEUR) -->
+                <!-- PARAMÈTRES (CONFIGURATEUR ADMIN) -->
                 <div v-if="view === 'Paramètres' && user.role === 'admin'" class="space-y-6">
                     <div class="card p-6 border-l-8 border-orange-500">
-                        <h3 class="font-black text-orange-600 uppercase text-sm mb-4">Configurer les Constantes</h3>
+                        <h3 class="font-black text-orange-600 uppercase text-xs mb-4">🔧 Configurer les Constantes</h3>
                         <div v-for="(c, idx) in config.constantes" :key="idx" class="flex gap-2 mb-2 items-center">
-                            <input v-model="c.icon" class="w-12 text-center" placeholder="Emoji">
-                            <input v-model="c.label" class="flex-1" placeholder="Nom (ex: Tension)">
-                            <input v-model="c.unit" class="w-20" placeholder="Unité">
-                            <button @click="config.constantes.splice(idx, 1)" class="text-red-500 p-2">✕</button>
+                            <input v-model="c.icon" class="w-12 text-center border p-2 rounded-lg" placeholder="Icon">
+                            <input v-model="c.label" class="flex-1 border p-2 rounded-lg text-sm" placeholder="Nom">
+                            <input v-model="c.unit" class="w-20 border p-2 rounded-lg text-sm" placeholder="Unité">
+                            <button @click="config.constantes.splice(idx, 1)" class="text-red-500 font-bold p-2">✕</button>
                         </div>
-                        <button @click="config.constantes.push({id: Date.now(), label:'', unit:'', icon:'📝'})" class="mt-4 text-xs font-bold text-blue-600 underline uppercase">+ Ajouter une constante</button>
+                        <button @click="config.constantes.push({id: Date.now().toString(), label:'', unit:'', icon:'📝'})" class="mt-4 text-[10px] font-bold text-blue-600 underline uppercase">+ Ajouter un champ</button>
                     </div>
 
                     <div class="card p-6 border-l-8 border-purple-500">
-                        <h3 class="font-black text-purple-600 uppercase text-sm mb-4">Configurer les Symptômes</h3>
+                        <h3 class="font-black text-purple-600 uppercase text-xs mb-4">🦠 Configurer les Symptômes</h3>
                         <div v-for="(s, idx) in config.symptomes" :key="idx" class="flex gap-2 mb-2 items-center">
-                            <input v-model="s.icon" class="w-12 text-center" placeholder="Emoji">
-                            <input v-model="s.label" class="flex-1" placeholder="Nom du symptôme">
-                            <button @click="config.symptomes.splice(idx, 1)" class="text-red-500 p-2">✕</button>
+                            <input v-model="s.icon" class="w-12 text-center border p-2 rounded-lg" placeholder="Icon">
+                            <input v-model="s.label" class="flex-1 border p-2 rounded-lg text-sm" placeholder="Symptôme">
+                            <button @click="config.symptomes.splice(idx, 1)" class="text-red-500 font-bold p-2">✕</button>
                         </div>
-                        <button @click="config.symptomes.push({id: Date.now(), label:'', icon:'⚠️'})" class="mt-4 text-xs font-bold text-blue-600 underline uppercase">+ Ajouter un symptôme</button>
+                        <button @click="config.symptomes.push({id: Date.now().toString(), label:'', icon:'⚠️'})" class="mt-4 text-[10px] font-bold text-blue-600 underline uppercase">+ Ajouter un symptôme</button>
                     </div>
                 </div>
 
-                <!-- VUE ALERTES (STAFF) -->
+                <!-- ALERTES (VUE STAFF) -->
                 <div v-if="view === 'Alertes' && user.role !== 'patient'" class="space-y-4">
-                    <div v-for="a in receivedAlerts" class="card p-5 border-l-8 border-red-500 shadow-lg">
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="font-black text-blue-900 uppercase">{{ a.patientId }}</span>
-                            <span class="text-[9px] bg-slate-100 px-2 py-1 rounded font-bold">{{ a.time }}</span>
+                    <div v-if="receivedAlerts.length === 0" class="text-center py-10 text-slate-400 italic">Aucune alerte reçue.</div>
+                    <div v-for="(a, index) in receivedAlerts" :key="index" class="card p-5 border-l-8 border-red-500 shadow-md">
+                        <div class="flex justify-between items-start mb-4">
+                            <p class="font-black text-blue-900 uppercase">{{ a.patientId }}</p>
+                            <button class="bg-sky-100 text-sky-700 font-bold px-3 py-1 rounded text-[9px] uppercase">Consulter les Urgences</button>
                         </div>
-                        <!-- Affichage dynamique des constantes reçues -->
-                        <div class="grid grid-cols-2 gap-2 mb-4">
-                            <div v-for="(val, key) in a.vitals" class="text-[10px] font-bold text-slate-500 bg-slate-50 p-2 rounded">
-                                {{ key }}: {{ val }}
+                        <div class="grid grid-cols-2 gap-2 mb-4 bg-slate-50 p-2 rounded-lg">
+                            <div v-for="(val, key) in a.vitals" class="text-[10px] font-bold text-slate-500">
+                                {{ key }}: <span class="text-blue-700">{{ val }}</span>
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-1 mb-4">
                             <span v-for="s in a.signs" class="bg-red-100 text-red-700 text-[9px] px-2 py-1 rounded-full font-black uppercase">{{ s }}</span>
                         </div>
+                        <p v-if="a.fileName" class="text-[9px] text-blue-600 font-bold mb-4 underline italic">📎 Fichier : {{ a.fileName }}</p>
                         <div v-if="user.role === 'admin'" class="border-t pt-4">
-                            <input v-model="a.reply" placeholder="Réponse rapide au patient..." class="w-full text-sm mb-2">
-                            <button @click="sendMessage(a)" class="w-full bg-slate-900 text-white text-[10px] font-bold py-2 rounded-lg uppercase">Envoyer la réponse</button>
+                            <textarea v-model="a.replyText" placeholder="Répondre au patient..." class="w-full p-2 border rounded-lg text-sm mb-2"></textarea>
+                            <button @click="sendMessage(a)" class="w-full bg-slate-800 text-white text-[10px] font-bold py-2 rounded-lg uppercase">Envoyer Réponse</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- AUTRES VUES STANDARDS RE-CONSOLIDÉES -->
+                <!-- PROFIL (CHANGEMENT MDP) -->
+                <div v-if="view === 'Profil'" class="card p-6 shadow-xl">
+                    <h3 class="font-black text-blue-900 uppercase text-xs mb-4">Sécurité du compte</h3>
+                    <div class="space-y-3">
+                        <input v-model="passChange.old" type="password" placeholder="Ancien mot de passe" class="w-full p-3 border rounded-xl">
+                        <input v-model="passChange.new" type="password" placeholder="Nouveau mot de passe" class="w-full p-3 border rounded-xl">
+                        <button @click="changeMyPassword" class="bg-blue-900 text-white font-black py-4 rounded-xl w-full uppercase">Mettre à jour</button>
+                    </div>
+                </div>
+
+                <!-- PATIENTS (GESTION ADMIN) -->
                 <div v-if="view === 'Patients' && user.role !== 'patient'" class="space-y-4">
-                    <div class="card p-6 bg-slate-900 text-white">
-                        <h3 class="font-bold text-xs uppercase mb-4">Nouveau Patient</h3>
-                        <div class="grid gap-2">
-                            <input v-model="newPatient.id" placeholder="Identifiant" class="text-black">
-                            <input v-model="newPatient.pass" placeholder="Mot de passe" class="text-black" type="password">
-                            <button @click="createPatient" class="bg-blue-600 py-3 rounded-xl font-bold uppercase">Inscrire</button>
+                    <div class="card p-6 bg-slate-50 border-2 border-slate-200">
+                        <h3 class="font-black text-slate-700 uppercase text-[10px] mb-4">Inscrire un Patient</h3>
+                        <div class="flex flex-col gap-2">
+                            <input v-model="newPatient.id" placeholder="ID Patient" class="p-3 border rounded-xl text-sm bg-white">
+                            <input v-model="newPatient.pass" placeholder="Mot de passe" class="p-3 border rounded-xl text-sm bg-white" type="password">
+                            <button @click="createPatient" class="bg-blue-600 text-white font-black py-3 rounded-xl uppercase shadow-md">Enregistrer</button>
                         </div>
                     </div>
-                    <div class="card p-4">
-                        <div v-for="(p, i) in patients" class="flex justify-between p-3 border-b last:border-0">
-                            <span class="font-bold">{{ p.id }}</span>
-                            <button @click="patients.splice(i,1)" class="text-red-500 text-xs">Supprimer</button>
+                    <div class="card p-6">
+                        <div v-for="(p, i) in patients" :key="i" class="flex justify-between py-3 border-b last:border-0">
+                            <span class="font-bold text-blue-900">{{ p.id }}</span>
+                            <button v-if="user.role === 'admin'" @click="patients.splice(i,1)" class="text-red-500 font-bold text-[10px] p-2 bg-red-50 rounded-lg">SUPPRIMER</button>
                         </div>
                     </div>
+                </div>
+
+                <!-- STATS -->
+                <div v-if="view === 'Stats' && user.role === 'admin'" class="grid grid-cols-2 gap-4">
+                    <div class="card p-6 bg-blue-800 text-white text-center shadow-lg"><p class="text-[10px] uppercase opacity-60">Patients Total</p><p class="text-4xl font-black">{{ patients.length }}</p></div>
+                    <div class="card p-6 bg-red-600 text-white text-center shadow-lg"><p class="text-[10px] uppercase opacity-60">Alertes Reçues</p><p class="text-4xl font-black">{{ totalAlertsHistory }}</p></div>
                 </div>
 
             </main>
@@ -164,42 +173,53 @@
     </div>
 
     <script>
-        const { createApp, ref, computed } = Vue
+        const { createApp, ref } = Vue
         createApp({
             setup() {
                 const user = ref(null);
                 const view = ref('Alertes');
                 const auth = ref({ id: '', pass: '' });
-                const patients = ref([{ id: 'P01', pass: '123', role: 'patient' }]);
-                const newPatient = ref({ id: '', pass: '' });
-                const patientMessages = ref({});
-                const receivedAlerts = ref([]);
                 const totalAlertsHistory = ref(0);
+                const passChange = ref({ old: '', new: '' });
+                const patients = ref([{ id: 'Patient01', pass: '123', role: 'patient' }]);
+                const newPatient = ref({ id: '', pass: '' });
+                const patientMessages = ref({}); 
+                const receivedAlerts = ref([]);
 
-                // CONFIGURATION DYNAMIQUE PAR LE DIRECTEUR
+                // CONFIGURATION DYNAMIQUE
                 const config = ref({
                     constantes: [
-                        { id: 'tension', label: 'Tension', unit: 'mmHg', icon: '🩸' },
+                        { id: 'ta_sys', label: 'Tension Systolique', unit: 'mmHg', icon: '🩸' },
                         { id: 'fc', label: 'Fréq. Cardiaque', unit: 'BPM', icon: '❤️' },
-                        { id: 'spo2', label: 'SpO2', unit: '%', icon: '🫁' }
+                        { id: 'spo2', label: 'Saturation O2', unit: '%', icon: '🫁' },
+                        { id: 'poids', label: 'Poids', unit: 'kg', icon: '⚖️' }
                     ],
                     symptomes: [
-                        { id: 'dyspnee', label: 'Essoufflement', icon: '😮‍💨' },
-                        { id: 'saignement', label: 'Saignement', icon: '💧' }
+                        { id: 'dyspnee', label: 'Essoufflement / Dyspnée', icon: '😮‍💨' },
+                        { id: 'saignement', label: 'Saignement (Epistaxis)', icon: '💧' },
+                        { id: 'oedeme', label: 'Oedèmes / Gonflement', icon: '🦶' }
                     ]
                 });
 
                 const form = ref({ vitals: {}, selectedSigns: [], file: null });
 
                 const login = () => {
-                    if(auth.value.id === 'admin' && auth.value.pass === 'admin') user.value = {id:'Directeur', role:'admin'};
+                    if(auth.value.id === 'admin' && auth.value.pass === 'admin') user.value = {id:'Directeur', role:'admin', pass:'admin'};
                     else {
                         const p = patients.value.find(x => x.id === auth.value.id && x.pass === auth.value.pass);
-                        if(p) user.value = p;
+                        if(p) user.value = p; else alert("Identifiants incorrects");
                     }
                 };
 
-                const logout = () => user.value = null;
+                const logout = () => { user.value = null; auth.value = {id:'', pass:''}; };
+
+                const changeMyPassword = () => {
+                    if(passChange.value.old === user.value.pass) {
+                        user.value.pass = passChange.value.new;
+                        alert("Succès ! Reconnectez-vous avec le nouveau mot de passe.");
+                        logout();
+                    } else alert("Ancien mot de passe faux.");
+                };
 
                 const toggleSymptom = (id) => {
                     const i = form.value.selectedSigns.indexOf(id);
@@ -208,30 +228,36 @@
                 };
 
                 const submitData = () => {
+                    const labels = form.value.selectedSigns.map(id => config.value.symptomes.find(s => s.id === id)?.label);
                     receivedAlerts.value.unshift({
                         patientId: user.value.id,
                         vitals: { ...form.value.vitals },
-                        signs: form.value.selectedSigns.map(id => config.value.symptomes.find(s => s.id === id).label),
+                        signs: labels,
+                        fileName: form.value.file,
                         time: new Date().toLocaleTimeString(),
-                        reply: ''
+                        replyText: ''
                     });
                     totalAlertsHistory.value++;
-                    alert("Alerte envoyée !");
+                    alert("Alerte transmise au service HHT.");
                     form.value = { vitals: {}, selectedSigns: [], file: null };
                 };
 
-                const sendMessage = (a) => {
-                    patientMessages.value[a.patientId] = a.reply;
-                    alert("Message envoyé !");
-                };
-
                 const createPatient = () => {
-                    patients.value.push({ ...newPatient.value, role: 'patient' });
-                    newPatient.value = { id: '', pass: '' };
-                    alert("Patient créé !");
+                    if(newPatient.value.id && newPatient.value.pass) {
+                        patients.value.push({ ...newPatient.value, role: 'patient' });
+                        newPatient.value = { id: '', pass: '' };
+                        alert("Patient ajouté !");
+                    }
                 };
 
-                return { user, auth, view, patients, newPatient, login, logout, config, form, toggleSymptom, submitData, receivedAlerts, sendMessage, patientMessages, totalAlertsHistory, createPatient };
+                const sendMessage = (a) => {
+                    if(a.replyText) {
+                        patientMessages.value[a.patientId] = a.replyText;
+                        alert("Message envoyé !");
+                    }
+                };
+
+                return { user, auth, view, patients, newPatient, login, logout, config, form, toggleSymptom, submitData, receivedAlerts, sendMessage, patientMessages, totalAlertsHistory, passChange, changeMyPassword, createPatient };
             }
         }).mount('#app')
     </script>
