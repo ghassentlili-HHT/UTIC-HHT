@@ -1,235 +1,220 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <!-- UNIQUE_DEPLOY_ID: 2026_FINAL_V3_RECOVERY -->
+    <!-- FORCE_DEPLOY_TOKEN: 7741-B92X-Q88L-FINAL -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UTIC HHT - Système Médical Intégral</title>
+    <title>UTIC HHT - Plateforme Médicale v2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .card { background: white; border-radius: 1.25rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
-        .nav-active { color: #1e40af; border-bottom: 3px solid #1e40af; font-weight: 800; }
-        .btn-red { background: #dc2626; color: white; font-weight: 900; border-radius: 1rem; transition: all 0.2s; }
-        .btn-red:hover { background: #b91c1c; transform: translateY(-2px); }
+        .card { background: white; border-radius: 1.25rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .nav-active { color: #1e40af; border-bottom: 4px solid #1e40af; font-weight: 900; }
+        .btn-red { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: white; font-weight: 900; border-radius: 1rem; transition: all 0.2s; }
+        .btn-red:hover { transform: scale(1.02); }
     </style>
 </head>
 <body>
     <div id="app">
-        <!-- LOGIN -->
-        <div v-if="!user" class="flex items-center justify-center min-h-screen p-6">
-            <div class="card w-full max-w-sm p-8 border-t-8 border-blue-900 shadow-2xl">
-                <h1 class="text-3xl font-black text-blue-900 text-center mb-8 italic tracking-tighter">UTIC HHT</h1>
+        <!-- LOGIN SCREEN -->
+        <div v-if="!user" class="flex items-center justify-center min-h-screen p-6 bg-slate-100">
+            <div class="card w-full max-w-sm p-8 border-t-8 border-blue-900">
+                <h1 class="text-3xl font-black text-blue-900 text-center mb-8 italic">UTIC HHT</h1>
                 <div class="space-y-4">
-                    <input v-model="auth.id" type="text" placeholder="Identifiant" class="w-full p-4 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                    <input v-model="auth.pass" type="password" placeholder="Mot de passe" class="w-full p-4 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                    <button @click="login" class="w-full bg-blue-900 text-white font-black py-4 rounded-xl shadow-lg uppercase">Connexion</button>
+                    <input v-model="auth.id" type="text" placeholder="Identifiant" class="w-full p-4 bg-white border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                    <input v-model="auth.pass" type="password" placeholder="Mot de passe" class="w-full p-4 bg-white border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                    <button @click="login" class="w-full bg-blue-900 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest">Entrer</button>
                 </div>
-                <p class="text-[10px] text-center mt-4 text-slate-400">admin / admin</p>
             </div>
         </div>
 
-        <!-- APP -->
+        <!-- MAIN APP -->
         <div v-else>
-            <nav class="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-50">
-                <h2 class="font-black text-blue-900 uppercase italic">UTIC HHT</h2>
-                <div class="flex gap-4 items-center">
-                    <button @click="view = 'Profil'" class="text-[10px] font-bold text-slate-400 uppercase underline">Profil</button>
-                    <button @click="logout" class="text-red-500 font-bold text-xs uppercase border border-red-100 px-3 py-1 rounded-lg">Quitter</button>
-                </div>
+            <nav class="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+                <h2 class="font-black text-blue-900 uppercase italic tracking-tighter">UTIC HHT</h2>
+                <button @click="logout" class="text-red-600 font-black text-xs uppercase px-4 py-2 bg-red-50 rounded-lg">Quitter</button>
             </nav>
 
-            <!-- MENU NAVIGATION STAFF -->
-            <div v-if="user.role !== 'patient'" class="flex bg-white shadow-sm sticky top-[57px] z-40 text-[10px] overflow-x-auto">
+            <!-- NAVIGATION STAFF -->
+            <div v-if="user.role !== 'patient'" class="flex bg-white border-b sticky top-[61px] z-40 text-[10px] overflow-x-auto">
                 <button v-for="tab in (user.role === 'admin' ? ['Alertes', 'RDV', 'Patients', 'Stats', 'Paramètres'] : ['Alertes', 'RDV', 'Patients'])" 
-                        @click="view = tab" :class="view === tab ? 'nav-active' : ''" class="flex-1 py-4 uppercase font-bold min-w-[80px]">
+                        @click="view = tab" :class="view === tab ? 'nav-active' : 'text-slate-400'" class="flex-1 py-4 uppercase font-bold min-w-[80px] transition-all">
                     {{ tab }}
                 </button>
             </div>
 
             <main class="p-4 max-w-4xl mx-auto space-y-6 pb-24">
 
-                <!-- VUE PATIENT -->
+                <!-- VIEW: PATIENT DASHBOARD -->
                 <div v-if="user.role === 'patient'" class="space-y-6">
-                    <!-- Message Admin -->
-                    <div v-if="patientMessages[user.id]" class="card p-5 bg-blue-600 text-white shadow-xl animate-pulse">
-                        <p class="font-bold text-lg">"{{ patientMessages[user.id] }}"</p>
-                        <button @click="patientMessages[user.id] = null" class="mt-2 text-[10px] underline uppercase">Marquer comme lu</button>
+                    <div v-if="patientMessages[user.id]" class="card p-5 bg-blue-700 text-white shadow-xl">
+                        <p class="font-black text-lg italic">"{{ patientMessages[user.id] }}"</p>
+                        <button @click="patientMessages[user.id] = null" class="mt-2 text-[10px] underline uppercase font-bold">J'ai lu le message</button>
                     </div>
 
-                    <!-- Bloc RDV -->
-                    <div class="card p-6 bg-slate-900 text-white flex justify-between items-center border-l-8 border-blue-500">
+                    <div class="card p-6 bg-blue-950 text-white flex justify-between items-center border-r-8 border-blue-500">
                         <div>
-                            <p class="text-[10px] uppercase font-bold text-blue-400 mb-1">Mon prochain rendez-vous</p>
-                            <p class="text-xl font-black italic">{{ myRDV || 'Aucun RDV prévu' }}</p>
+                            <p class="text-[10px] uppercase font-bold text-blue-300">Mon Prochain RDV</p>
+                            <p class="text-2xl font-black italic tracking-tight">{{ myRDV || 'Pas de RDV programmé' }}</p>
                         </div>
-                        <span class="text-3xl">📅</span>
+                        <span class="text-4xl">📅</span>
                     </div>
 
-                    <!-- Formulaire d'urgence -->
-                    <div class="card p-6 border-2 border-red-500 shadow-2xl">
-                        <h3 class="font-black text-red-600 text-sm uppercase mb-8 text-center italic tracking-widest">Signaler une Urgence</h3>
+                    <!-- SIGNALEMENT URGENCE -->
+                    <div class="card p-6 border-4 border-red-500 shadow-2xl">
+                        <h3 class="font-black text-red-600 text-center text-sm uppercase mb-8 italic">Signaler une Urgence Médicale</h3>
                         
                         <div class="grid grid-cols-2 gap-4 mb-8">
-                            <div v-for="c in config.constantes" :key="c.id">
+                            <div v-for="c in config.vitals" :key="c.id">
                                 <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">{{ c.icon }} {{ c.label }}</label>
-                                <input v-model="form.vitals[c.id]" :placeholder="c.unit" class="w-full bg-slate-50 p-4 rounded-2xl border-none font-bold focus:ring-2 focus:ring-blue-500">
+                                <input v-model="form.vitals[c.id]" :placeholder="c.unit" class="w-full bg-slate-50 p-4 rounded-2xl border-none font-bold text-blue-900 focus:ring-2 focus:ring-red-500 transition-all">
                             </div>
                         </div>
 
                         <div class="grid gap-3 mb-8">
-                            <div v-for="s in config.symptomes" :key="s.id" @click="toggleSymptom(s.id)"
-                                 :class="form.selectedSigns.includes(s.id) ? 'bg-red-50 border-red-600 shadow-inner' : 'border-slate-100'"
+                            <div v-for="s in config.symptoms" :key="s.id" @click="toggleSymptom(s.id)"
+                                 :class="form.selectedSigns.includes(s.id) ? 'bg-red-50 border-red-600 scale-[1.02] shadow-md' : 'border-slate-100 bg-white'"
                                  class="flex items-center p-5 border-2 rounded-2xl cursor-pointer transition-all">
                                 <span class="text-3xl mr-4">{{ s.icon }}</span>
-                                <span class="font-black text-slate-700 text-xs flex-1 uppercase tracking-tight">{{ s.label }}</span>
-                                <span v-if="form.selectedSigns.includes(s.id)" class="text-red-600 font-bold">✅</span>
+                                <span class="font-black text-slate-700 text-xs flex-1 uppercase">{{ s.label }}</span>
+                                <span v-if="form.selectedSigns.includes(s.id)" class="text-red-600 font-black">✅</span>
                             </div>
                         </div>
 
-                        <div class="mb-8 p-4 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                            <label class="text-[10px] font-black text-slate-400 uppercase block mb-2">Pièce jointe (Photo/Analyse) :</label>
+                        <div class="mb-8 p-5 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                            <label class="text-[10px] font-black text-slate-400 uppercase block mb-2">📎 Joindre un document (Photo/Analyse) :</label>
                             <input type="file" @change="e => form.file = e.target.files[0].name" class="text-xs font-bold text-slate-500">
                         </div>
 
-                        <button @click="submitData" class="w-full btn-red py-6 text-xl shadow-2xl uppercase tracking-tighter">Envoyer l'alerte immédiate</button>
+                        <button @click="submitData" class="w-full btn-red py-6 text-xl shadow-2xl uppercase tracking-tighter">🚀 Envoyer l'alerte urgente</button>
                     </div>
 
-                    <!-- Contacts en bas de page -->
-                    <div class="card p-6 border-t-8 border-blue-900">
-                        <h4 class="font-black text-blue-900 text-xs uppercase mb-6 italic tracking-widest">Contacts de l'Unité HHT</h4>
+                    <!-- CONTACTS BAS DE PAGE -->
+                    <div class="card p-6 border-t-8 border-blue-900 bg-white">
+                        <h4 class="font-black text-blue-900 text-xs uppercase mb-6 italic">Contacts de l'Unité HHT</h4>
                         <div class="space-y-4">
-                            <div v-for="ct in config.contacts" class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl">
+                            <div v-for="ct in config.contacts" class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
                                 <div>
                                     <p class="text-[9px] font-black text-blue-500 uppercase">{{ ct.role }}</p>
                                     <p class="font-black text-slate-800">{{ ct.name }}</p>
                                 </div>
-                                <a :href="'tel:'+ct.phone" class="bg-blue-900 text-white font-bold px-4 py-2 rounded-xl text-xs">{{ ct.phone }}</a>
+                                <a :href="'tel:'+ct.phone" class="bg-blue-900 text-white font-black px-4 py-2 rounded-xl text-xs">{{ ct.phone }}</a>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ALERTES (STAFF) -->
+                <!-- VIEW: ALERTES (STAFF) -->
                 <div v-if="view === 'Alertes' && user.role !== 'patient'" class="space-y-4">
-                    <div v-if="receivedAlerts.length === 0" class="text-center py-20 text-slate-300 font-black uppercase italic">Aucune alerte reçue</div>
-                    <div v-for="(a, index) in receivedAlerts" :key="index" class="card p-6 border-l-[12px] border-red-600 shadow-xl">
+                    <div v-if="receivedAlerts.length === 0" class="text-center py-20 text-slate-300 font-black uppercase italic">Aucune alerte en attente</div>
+                    <div v-for="(a, index) in receivedAlerts" :key="index" class="card p-6 border-l-[12px] border-red-600 animate-in fade-in duration-500">
                         <div class="flex justify-between items-start mb-6">
                             <div>
-                                <h3 class="text-2xl font-black text-blue-900 uppercase">{{ a.patientId }}</h3>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ a.time }}</p>
+                                <h3 class="text-2xl font-black text-blue-900 uppercase tracking-tighter">{{ a.patientId }}</h3>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase italic">{{ a.time }}</p>
                             </div>
-                            <button @click="goToRDVFromAlert(a.patientId)" class="bg-blue-900 text-white font-black px-4 py-2 rounded-xl text-[10px] uppercase">Prendre RDV</button>
+                            <button @click="goToRDVFromAlert(a.patientId)" class="bg-blue-950 text-white font-black px-4 py-2 rounded-xl text-[10px] uppercase shadow-lg">Fixer un RDV</button>
                         </div>
                         
                         <div class="grid grid-cols-2 gap-3 mb-6">
-                            <div v-for="(val, key) in a.vitals" class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <div v-for="(val, key) in a.vitals" class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                                 <p class="text-[9px] font-black text-slate-400 uppercase">{{ key }}</p>
-                                <p class="font-black text-blue-800 text-lg">{{ val }}</p>
+                                <p class="font-black text-blue-800 text-xl">{{ val }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-wrap gap-2 mb-6">
-                            <span v-for="s in a.signs" class="bg-red-600 text-white text-[10px] px-4 py-1 rounded-full font-black uppercase shadow-sm">⚠️ {{ s }}</span>
+                            <span v-for="s in a.signs" class="bg-red-600 text-white text-[10px] px-4 py-1 rounded-full font-black uppercase">⚠️ {{ s }}</span>
                         </div>
 
-                        <!-- BOUTON TELECHARGER -->
+                        <!-- BOUTON TÉLÉCHARGER DANS L'ALERTE -->
                         <div v-if="a.fileName" class="mb-6 flex items-center justify-between p-4 bg-blue-50 rounded-2xl border border-blue-200">
-                            <span class="text-xs font-black text-blue-800 italic">📎 {{ a.fileName }}</span>
-                            <button @click="alert('Ouverture sécurisée du fichier : ' + a.fileName)" class="bg-blue-600 text-white font-black text-[10px] px-4 py-2 rounded-xl uppercase">Télécharger</button>
+                            <span class="text-xs font-black text-blue-900 italic">📄 {{ a.fileName }}</span>
+                            <button @click="alert('Ouverture du fichier : ' + a.fileName)" class="bg-blue-600 text-white font-black text-[10px] px-4 py-2 rounded-xl uppercase hover:bg-blue-700 transition-all">Télécharger</button>
                         </div>
 
                         <div v-if="user.role === 'admin'" class="border-t pt-6">
                             <textarea v-model="a.replyText" placeholder="Répondre au patient..." class="w-full p-4 bg-slate-50 border rounded-2xl text-sm mb-3 outline-none focus:ring-2 focus:ring-blue-900"></textarea>
-                            <button @click="sendMessage(a)" class="w-full bg-slate-900 text-white font-black py-3 rounded-xl uppercase text-xs tracking-widest">Envoyer Réponse</button>
+                            <button @click="sendMessage(a)" class="w-full bg-slate-900 text-white font-black py-4 rounded-xl uppercase text-xs">Envoyer au patient</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- PARAMÈTRES (ADMIN - ENTIÈREMENT PERSONNALISABLES) -->
+                <!-- VIEW: PARAMÈTRES (ADMIN CUSTOM) -->
                 <div v-if="view === 'Paramètres' && user.role === 'admin'" class="space-y-6">
                     <div class="card p-6 border-l-8 border-orange-500">
-                        <h3 class="font-black text-orange-600 uppercase text-xs mb-6 tracking-widest">🔧 Constantes Médicales</h3>
-                        <div v-for="(c, idx) in config.constantes" :key="idx" class="flex gap-2 mb-3 bg-slate-50 p-2 rounded-xl">
-                            <input v-model="c.icon" class="w-14 text-center border-none rounded-lg bg-white" title="Emoji">
-                            <input v-model="c.label" class="flex-1 p-2 rounded-lg text-xs font-bold" placeholder="Libellé">
+                        <h3 class="font-black text-orange-600 uppercase text-xs mb-6">⚙️ Configurer les Données</h3>
+                        <div v-for="(c, idx) in config.vitals" :key="idx" class="flex gap-2 mb-3 bg-slate-50 p-2 rounded-xl">
+                            <input v-model="c.icon" class="w-14 text-center border-none rounded-lg bg-white" placeholder="🏠">
+                            <input v-model="c.label" class="flex-1 p-2 rounded-lg text-xs font-bold" placeholder="Nom">
                             <input v-model="c.unit" class="w-20 p-2 rounded-lg text-xs" placeholder="Unité">
-                            <button @click="config.constantes.splice(idx, 1)" class="text-red-500 font-black px-3">✕</button>
+                            <button @click="config.vitals.splice(idx, 1)" class="text-red-500 font-black px-3">✕</button>
                         </div>
-                        <button @click="config.constantes.push({id:Date.now(), label:'', unit:'', icon:'💉'})" class="mt-2 text-[10px] font-black text-blue-600 uppercase underline">+ Ajouter une donnée</button>
+                        <button @click="config.vitals.push({id:Date.now(), label:'', unit:'', icon:'💉'})" class="text-[10px] font-black text-blue-600 uppercase underline">+ Ajouter une constante</button>
                     </div>
 
                     <div class="card p-6 border-l-8 border-purple-500">
-                        <h3 class="font-black text-purple-600 uppercase text-xs mb-6 tracking-widest">🦠 Signes d'Alerte Custom</h3>
-                        <div v-for="(s, idx) in config.symptomes" :key="idx" class="flex gap-2 mb-3 bg-slate-50 p-2 rounded-xl">
-                            <input v-model="s.icon" class="w-14 text-center border-none rounded-lg bg-white" title="Emoji">
-                            <input v-model="s.label" class="flex-1 p-2 rounded-lg text-xs font-bold" placeholder="Signe clinique">
-                            <button @click="config.symptomes.splice(idx, 1)" class="text-red-500 font-black px-3">✕</button>
+                        <h3 class="font-black text-purple-600 uppercase text-xs mb-6">🆘 Configurer les Symptômes</h3>
+                        <div v-for="(s, idx) in config.symptoms" :key="idx" class="flex gap-2 mb-3 bg-slate-50 p-2 rounded-xl">
+                            <input v-model="s.icon" class="w-14 text-center border-none rounded-lg bg-white">
+                            <input v-model="s.label" class="flex-1 p-2 rounded-lg text-xs font-bold" placeholder="Symptôme">
+                            <button @click="config.symptoms.splice(idx, 1)" class="text-red-500 font-black px-3">✕</button>
                         </div>
-                        <button @click="config.symptomes.push({id:Date.now(), label:'', icon:'⚠️'})" class="mt-2 text-[10px] font-black text-blue-600 uppercase underline">+ Ajouter un signe</button>
+                        <button @click="config.symptoms.push({id:Date.now(), label:'', icon:'⚠️'})" class="text-[10px] font-black text-blue-600 uppercase underline">+ Ajouter un symptôme</button>
                     </div>
 
                     <div class="card p-6 border-l-8 border-blue-900">
-                        <h3 class="font-black text-blue-900 uppercase text-xs mb-6 tracking-widest">📞 Contacts Dashboard</h3>
+                        <h3 class="font-black text-blue-900 uppercase text-xs mb-6">📞 Configurer les Contacts</h3>
                         <div v-for="(ct, idx) in config.contacts" :key="idx" class="space-y-2 mb-4 p-4 bg-slate-50 rounded-2xl">
                             <input v-model="ct.role" class="w-full p-2 rounded text-[10px] font-black uppercase text-blue-600" placeholder="Rôle">
                             <div class="flex gap-2">
                                 <input v-model="ct.name" class="flex-1 p-2 rounded text-xs font-bold" placeholder="Nom">
-                                <input v-model="ct.phone" class="flex-1 p-2 rounded text-xs" placeholder="Tél">
+                                <input v-model="ct.phone" class="flex-1 p-2 rounded text-xs" placeholder="Téléphone">
                             </div>
-                            <button @click="config.contacts.splice(idx, 1)" class="text-red-500 text-[9px] font-black underline">Supprimer</button>
+                            <button @click="config.contacts.splice(idx, 1)" class="text-red-500 text-[9px] font-black underline">Supprimer contact</button>
                         </div>
-                        <button @click="config.contacts.push({role:'', name:'', phone:''})" class="text-[10px] font-black text-blue-600 uppercase underline">+ Ajouter contact</button>
+                        <button @click="config.contacts.push({role:'', name:'', phone:''})" class="text-[10px] font-black text-blue-600 uppercase underline">+ Ajouter un contact</button>
                     </div>
                 </div>
 
-                <!-- AUTRES VUES (RDV, PATIENTS, PROFIL, STATS) -->
+                <!-- AUTRES VUES (RDV, PATIENTS, ETC.) -->
                 <div v-if="view === 'RDV' && user.role !== 'patient'" class="card p-8">
-                    <input type="date" v-model="currentDate" class="w-full p-4 border-2 border-blue-100 rounded-2xl mb-6 font-black text-blue-900 text-xl outline-none">
-                    <div class="grid gap-3">
+                    <input type="date" v-model="currentDate" class="w-full p-4 border-2 border-blue-100 rounded-2xl mb-6 font-black text-blue-900 text-xl">
+                    <div class="space-y-2">
                         <div v-for="n in 8" :key="n" class="flex justify-between items-center p-5 bg-slate-50 rounded-2xl border-2 border-slate-100">
-                            <div><p class="text-[10px] font-black text-slate-400 uppercase">Heure</p><p class="font-black text-blue-900 text-lg">{{ n+8 }}h:00</p></div>
-                            <div v-if="getRDV(n+8)" class="text-right"><p class="font-black text-blue-700 uppercase">{{ getRDV(n+8).pId }}</p></div>
-                            <button v-else @click="addRDV(n+8)" class="bg-blue-900 text-white font-black px-6 py-2 rounded-xl text-xs uppercase shadow-md">Libre</button>
+                            <div><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Heure</p><p class="font-black text-blue-900 text-lg">{{ n+8 }}h:00</p></div>
+                            <div v-if="getRDV(n+8)" class="text-right"><p class="font-black text-blue-800 uppercase">{{ getRDV(n+8).pId }}</p></div>
+                            <button v-else @click="addRDV(n+8)" class="bg-blue-900 text-white font-black px-6 py-2 rounded-xl text-xs uppercase shadow-md transition-all hover:bg-blue-800">Libre</button>
                         </div>
                     </div>
                 </div>
 
                 <div v-if="view === 'Patients' && user.role !== 'patient'" class="space-y-6">
                     <div class="card p-6 bg-blue-900 text-white shadow-2xl">
-                        <h3 class="font-black uppercase text-xs mb-4 italic tracking-widest">Inscrire un Patient</h3>
+                        <h3 class="font-black uppercase text-[10px] mb-4 opacity-70">Créer un profil patient</h3>
                         <div class="grid gap-3">
-                            <input v-model="newPatient.id" placeholder="Nom du Patient" class="p-4 rounded-xl text-blue-900 font-bold outline-none">
-                            <input v-model="newPatient.pass" placeholder="Mot de passe" type="password" class="p-4 rounded-xl text-blue-900 font-bold outline-none">
-                            <button @click="createPatient" class="bg-blue-500 py-4 rounded-xl font-black uppercase shadow-xl">Enregistrer</button>
+                            <input v-model="newPatient.id" placeholder="Identifiant" class="p-4 rounded-xl text-blue-900 font-bold">
+                            <input v-model="newPatient.pass" placeholder="Mot de passe" type="password" class="p-4 rounded-xl text-blue-900 font-bold">
+                            <button @click="createPatient" class="bg-blue-500 py-4 rounded-xl font-black uppercase">Valider</button>
                         </div>
                     </div>
                     <div class="card p-6">
-                        <div v-for="(p, i) in patients" :key="i" class="flex justify-between items-center py-4 border-b last:border-0">
-                            <span class="font-black text-blue-900">{{ p.id }}</span>
-                            <button v-if="user.role === 'admin'" @click="patients.splice(i,1)" class="text-red-500 font-black text-[10px] uppercase">Désinscrire</button>
+                        <div v-for="(p, i) in patients" :key="i" class="flex justify-between items-center py-4 border-b last:border-0 font-black text-blue-900">
+                            <span>{{ p.id }}</span>
+                            <button v-if="user.role === 'admin'" @click="patients.splice(i,1)" class="text-red-500 text-[9px] uppercase font-black px-2 py-1 bg-red-50 rounded">Supprimer</button>
                         </div>
-                    </div>
-                </div>
-
-                <div v-if="view === 'Profil'" class="card p-8">
-                    <h3 class="font-black text-blue-900 uppercase text-sm mb-6 italic tracking-widest">Sécurité du Compte</h3>
-                    <div class="space-y-4">
-                        <input v-model="passChange.old" type="password" placeholder="Ancien MDP" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none">
-                        <input v-model="passChange.new" type="password" placeholder="Nouveau MDP" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none">
-                        <button @click="changeMyPassword" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl uppercase">Mettre à jour</button>
                     </div>
                 </div>
 
                 <div v-if="view === 'Stats' && user.role === 'admin'" class="grid grid-cols-2 gap-4">
-                    <div class="card p-8 bg-blue-900 text-white text-center shadow-2xl">
-                        <p class="text-[10px] font-black uppercase opacity-60 tracking-widest mb-2">Patients Actifs</p>
-                        <p class="text-5xl font-black italic">{{ patients.length }}</p>
+                    <div class="card p-8 bg-blue-950 text-white text-center shadow-2xl">
+                        <p class="text-[10px] font-black uppercase opacity-60 mb-2">Patients Inscrits</p>
+                        <p class="text-6xl font-black italic">{{ patients.length }}</p>
                     </div>
-                    <div class="card p-8 bg-red-600 text-white text-center shadow-2xl">
-                        <p class="text-[10px] font-black uppercase opacity-60 tracking-widest mb-2">Total Alertes</p>
-                        <p class="text-5xl font-black italic">{{ totalAlertsHistory }}</p>
+                    <div class="card p-8 bg-red-700 text-white text-center shadow-2xl">
+                        <p class="text-[10px] font-black uppercase opacity-60 mb-2">Alertes Totales</p>
+                        <p class="text-6xl font-black italic">{{ totalAlertsHistory }}</p>
                     </div>
                 </div>
 
@@ -245,50 +230,55 @@
                 const patients = ref([{ id: 'Patient01', pass: '123', role: 'patient' }]); const newPatient = ref({ id: '', pass: '' });
                 const patientMessages = ref({}); const receivedAlerts = ref([]); const rdvList = ref([]);
                 const currentDate = ref(new Date().toISOString().substr(0,10)); const pendingPatient = ref(null);
-                const passChange = ref({ old: '', new: '' }); const totalAlertsHistory = ref(0);
+                const totalAlertsHistory = ref(0);
 
                 const config = ref({
-                    constantes: [
+                    vitals: [
                         { id: 'ta', label: 'Tension', unit: 'mmHg', icon: '🩸' },
-                        { id: 'fc', label: 'Rythme', unit: 'BPM', icon: '❤️' },
+                        { id: 'fc', label: 'Cœur', unit: 'BPM', icon: '❤️' },
                         { id: 'poids', label: 'Poids', unit: 'kg', icon: '⚖️' }
                     ],
-                    symptomes: [
-                        { id: 'dys', label: 'Dyspnée (Essoufflement)', icon: '😮‍💨' },
+                    symptoms: [
+                        { id: 'dys', label: 'Dyspnée (Souffle)', icon: '😮‍💨' },
                         { id: 'oed', label: 'Oedèmes (Gonflement)', icon: '🦶' },
                         { id: 'fat', label: 'Fatigue intense', icon: '😫' },
-                        { id: 'gp', label: 'Gain de poids rapide', icon: '📈' },
-                        { id: 'epi', label: 'Epistaxis (Saignement)', icon: '💧' }
+                        { id: 'gp', label: 'Gain de poids', icon: '📈' }
                     ],
                     contacts: [
-                        { role: 'Secrétariat HHT', name: 'Mme Durand', phone: '01 40 00 00 00' },
-                        { role: 'IDEC HHT', name: 'M. Lefebvre', phone: '06 00 00 00 00' }
+                        { role: 'Unité HHT', name: 'Mme Martin', phone: '01 40 00 00 00' },
+                        { role: 'Urgence Cardio', name: 'Dr. Lucas', phone: '06 11 22 33 44' }
                     ]
                 });
 
                 const form = ref({ vitals: {}, selectedSigns: [], file: null });
 
                 const login = () => {
-                    if(auth.value.id === 'admin' && auth.value.pass === 'admin') user.value = {id:'Direction', role:'admin', pass:'admin'};
-                    else { const p = patients.value.find(x => x.id === auth.value.id && x.pass === auth.value.pass); if(p) user.value = p; else alert("Identifiant invalide"); }
+                    if(auth.value.id === 'admin' && auth.value.pass === 'admin') user.value = {id:'Admin', role:'admin', pass:'admin'};
+                    else { const p = patients.value.find(x => x.id === auth.value.id && x.pass === auth.value.pass); if(p) user.value = p; else alert("Accès Refusé"); }
                 };
-                const logout = () => { user.value = null; view.value = 'Alertes'; };
-                const changeMyPassword = () => { if(passChange.value.old === user.value.pass) { user.value.pass = passChange.value.new; alert("Réussite !"); logout(); } };
+                const logout = () => { user.value = null; };
                 const toggleSymptom = (id) => { const i = form.value.selectedSigns.indexOf(id); if(i > -1) form.value.selectedSigns.splice(i, 1); else form.value.selectedSigns.push(id); };
                 
                 const submitData = () => {
-                    receivedAlerts.value.unshift({ patientId: user.value.id, vitals: { ...form.value.vitals }, signs: form.value.selectedSigns.map(id => config.value.symptomes.find(s => s.id === id)?.label), fileName: form.value.file, time: new Date().toLocaleTimeString(), replyText: '' });
-                    totalAlertsHistory.value++; alert("ALERTE TRANSMISE AU SERVICE MEDICAL."); form.value = { vitals: {}, selectedSigns: [], file: null };
+                    receivedAlerts.value.unshift({ 
+                        patientId: user.value.id, 
+                        vitals: { ...form.value.vitals }, 
+                        signs: form.value.selectedSigns.map(id => config.value.symptoms.find(s => s.id === id)?.label), 
+                        fileName: form.value.file, 
+                        time: new Date().toLocaleTimeString(), 
+                        replyText: '' 
+                    });
+                    totalAlertsHistory.value++; alert("ALERTE ENVOYÉE AU STAFF MÉDICAL."); form.value = { vitals: {}, selectedSigns: [], file: null };
                 };
 
                 const goToRDVFromAlert = (id) => { pendingPatient.value = id; view.value = 'RDV'; };
-                const addRDV = (n) => { const pId = pendingPatient.value || prompt("ID Patient :"); if(pId) { rdvList.value.push({ slot: n, date: currentDate.value, pId }); pendingPatient.value = null; alert("RDV Validé"); } };
+                const addRDV = (n) => { const pId = pendingPatient.value || prompt("ID Patient :"); if(pId) { rdvList.value.push({ slot: n, date: currentDate.value, pId }); pendingPatient.value = null; } };
                 const getRDV = (n) => rdvList.value.find(r => r.date === currentDate.value && r.slot === n);
                 const myRDV = computed(() => { if (!user.value) return null; const r = rdvList.value.find(x => x.pId === user.value.id); return r ? `Le ${r.date} à ${r.slot}h:00` : null; });
                 const createPatient = () => { if(newPatient.value.id) { patients.value.push({ ...newPatient.value, role: 'patient' }); newPatient.value = { id: '', pass: '' }; alert("Patient inscrit."); } };
                 const sendMessage = (a) => { if(a.replyText) { patientMessages.value[a.patientId] = a.replyText; alert("Réponse envoyée"); a.replyText = ''; } };
 
-                return { user, auth, view, patients, newPatient, login, logout, config, form, toggleSymptom, submitData, receivedAlerts, sendMessage, patientMessages, totalAlertsHistory, passChange, changeMyPassword, createPatient, rdvList, currentDate, pendingPatient, addRDV, getRDV, myRDV, goToRDVFromAlert };
+                return { user, auth, view, patients, newPatient, login, logout, config, form, toggleSymptom, submitData, receivedAlerts, sendMessage, patientMessages, totalAlertsHistory, createPatient, rdvList, currentDate, pendingPatient, addRDV, getRDV, myRDV, goToRDVFromAlert };
             }
         }).mount('#app')
     </script>
